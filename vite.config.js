@@ -45,6 +45,18 @@ export default defineConfig({
     ],
   },
   server: {
-    port: 3000,
+    host: '0.0.0.0',
+    port: 8080,
+    https: {
+      cert: '/home/jianxff/.https/api.pem',
+      key: '/home/jianxff/.https/api.key'
+    },
+    proxy: {
+      '/api': {
+        target: 'http://10.29.24.220:8101',   //代理接口
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      }
+    }
   },
 })
