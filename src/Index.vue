@@ -25,7 +25,7 @@
 
     <!-- info -->
     <p class="text-h6 font-weight-bold ml-2">
-      Recent
+      Links
     </p>
 
   </v-navigation-drawer>

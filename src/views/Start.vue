@@ -27,6 +27,27 @@
   
   <!-- tracking -->
   <p class="text-h6 font-weight-bold ml-2">Review Scenes</p>
+  <template v-for="(value, key) in Reviews.data">
+    <v-card variant="flat"
+      rounded="lg"
+      class="mt-2 mb-2 px-5"
+    >
+      <v-btn 
+        style="position: absolute; right:25px; top:25px"
+        icon="mdi-play" color="green" size="small" elevation="0"
+        @click="openReview(key)"
+      />
+      
+      <div class="mt-4"></div>
+      <p class="text-caption font-weight-bold">{{ value.id }}</p>
+      <p class="text-h5 font-weight-bold">{{ value.id }}</p>
+
+      <div class="mt-2"></div>
+      <p class="text-caption">Created at {{ value.time }}</p>
+      <p class="text-caption">With <strong>{{ value.nmps }}</strong> map points + <strong>{{ value.nkfs }}</strong> keyframes</p>
+      <div class="mt-4"></div>
+    </v-card>
+  </template>
 </div>
 
 </template>
@@ -34,11 +55,20 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import {queryScenes} from '@/plugins/retrieve'
 
 const Router = useRouter();
 
+const Reviews = reactive({
+  data:{}
+});
+
 function openSession() {
   Router.push('/session/create/0')
+}
+
+function openReview(id) {
+  Router.push('/session/review/'+id)
 }
 
 const Scenes = reactive({
@@ -46,6 +76,10 @@ const Scenes = reactive({
 })
 
 onMounted(() => {
+  queryScenes().then(data => {
+    console.log(data);
+    Reviews.data = data;
+  })
 })
 
 </script>
