@@ -9,5 +9,20 @@ async function queryScenes(){
   })
 }
 
+async function removeScene(uid){
+  return new Promise((resolve, reject) => {
+    fetch('/api/remove', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        uid: uid
+      }),
+		})
+    .then(response => response.json())
+    .then(data => resolve(data))
+    .catch(err => {
+      reject(err)
+    })
+  })
+}
 
-export {queryScenes}
+export {queryScenes, removeScene}

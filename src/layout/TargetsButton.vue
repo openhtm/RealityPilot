@@ -6,6 +6,7 @@
   class="d-flex justify-start my-1 px-2 py-1"
   :variant="Selected === key ? 'flat' : 'text'"
   :color="Selected === key ? props.color : 'black'"
+  :disabled="props.disabled.includes(key)"
   @click="onClick(key)"
 >
   <v-icon size="large"
@@ -32,6 +33,9 @@ const props = defineProps({
   },
   action: {
     type: Function, default: () => {}
+  },
+  disabled: {
+    type: Array, default: []
   }
 })
 

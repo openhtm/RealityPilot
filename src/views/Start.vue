@@ -1,6 +1,6 @@
 <template>
 <div class="d-flex flex-column mx-6">
-  <div class="mt-3"></div>
+  <div class="mt-1"></div>
 
   <!-- scanning -->
   <p class="text-h6 font-weight-bold ml-2">Create New Scene</p>
@@ -39,7 +39,7 @@
       />
       
       <div class="mt-4"></div>
-      <p class="text-caption font-weight-bold">{{ value.id }}</p>
+      <p class="text-caption font-weight-bold">Ready for Reviewing</p>
       <p class="text-h5 font-weight-bold">{{ value.id }}</p>
 
       <div class="mt-2"></div>
@@ -76,9 +76,15 @@ const Scenes = reactive({
 })
 
 onMounted(() => {
+  Reviews.data = {};
   queryScenes().then(data => {
     console.log(data);
-    Reviews.data = data;
+    // filter
+    for(let id in data) {
+      let item = data[id];
+      if(item.status >= 4)
+        Reviews.data[id] = item;
+    }
   })
 })
 

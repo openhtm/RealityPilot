@@ -24,7 +24,7 @@
   <div style="position: absolute; z-index: 10; top:20px; left:20px">
     <v-btn  rounded="lg" variant="flat" size="large"
       style="background: rgba(0,0,0,0.1); backdrop-filter: blur(20px);"
-      @click="stop(1)"
+      @click="stop('cancel')"
     >
       <p class="text-body-1 text-white font-weight-bold">Cancel</p>
     </v-btn>
@@ -46,15 +46,11 @@
       </template>
       <template v-else>
         <v-btn size="55" icon="" variant="flat" color="deep-orange" :disabled="!Available"
-          @click="stop"
+          @click="stop('release')"
         />
       </template>
     </div>
   </div>
-
-  <!-- <div style="position:absolute; z-index: 10; left:20px;bottom: 20px;">
-    <video id="rtc" autoplay="true" playsinline="true" style="z-index:1; border-radius: 10px;"></video>
-  </div> -->
 
   <!-- canvas -->
   <canvas id="canvas" style="position: absolute; z-index: 2;">
@@ -62,37 +58,6 @@
   <!-- main video -->
   <video id="env" playsinline="true" style="z-index:1; overflow: hidden;"></video>
 
-    <!-- <div style="position: absolute; z-index: 9; width: 100%;" class="d-flex">
-      <div id="cvl" style="width: 50%; aspect-ratio:4/3;">
-      </div>
-      <div id="cvr" style="width: 50%; aspect-ratio:4/3;" class="d-flex justify-center">
-        <v-card variant="outlined"
-          class="align-self-center px-4 rounded-lg"
-          color="grey"
-        >
-          <p class="text-overline text-grey font-weight-black">
-            STOPPED
-          </p>
-        </v-card>
-        
-      </div>
-    </div> -->
-
-    <!-- original data -->
-    <!-- <div id="div_env" style="width: 50%;">
-      <video id="env" autoplay="true" playsinline="true" style="width: 100%; z-index:1;"></video>
-    </div>
-    <div id="div_rtc" style="width: 50%;">
-      <div style="position: absolute; width: 50%; aspect-ratio:4/3; z-index: -1;" class="d-flex justify-center">
-        <v-card variant="outlined" color="grey" class="align-self-center px-4 rounded-lg">
-          <p class="text-overline text-grey font-weight-black">
-            {{ started ? "waiting" : "no signal" }}
-          </p>
-        </v-card>
-      </div>
-      <video id="rtc" autoplay="true" playsinline="true" style="width: 100%; z-index:1;"></video>
-    </div> -->
-    
 </div>
 </template>
 
@@ -334,9 +299,9 @@ function releaseMedia() {
 }
 
 // stop webrtc connect
-async function stop(canceled = false) {
-  canceled = Boolean(canceled);
+async function stop(signal) {
   let hook = props.onCancel;
+  let canceled = !(signal === 'release');
 
   if(Started.value) {
     // set stop signal

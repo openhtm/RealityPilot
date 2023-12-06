@@ -3,12 +3,12 @@
   <!-- navigation -->
   <v-navigation-drawer
     color="background"
-    width="280"
+    width="260"
     theme="main"
     permanent
-    class="px-4 pt-8 d-flex flex-column"
+    class="px-4 pt-10 d-flex flex-column"
   >
-    <p class="text-h4 font-weight-black ml-2">
+    <p class="text-h5 font-weight-black ml-2">
       Reality Pilot
     </p>
 
@@ -29,7 +29,7 @@
     </p>
 
   </v-navigation-drawer>
-  <v-main class="pt-8">
+  <v-main class="pt-10">
     <router-view></router-view>
   </v-main>
 </v-app>

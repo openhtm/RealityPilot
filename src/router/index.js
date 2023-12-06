@@ -25,6 +25,32 @@ const routes = [
   {
     path: '/session/:type/:uid',
     component: () => import('@/views/Session.vue')
+  },
+  {
+    path: '/Compose/:uid',
+    component: () => import('@/Compose.vue'),
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/compose/Preview.vue')
+      },
+      {
+        path: 'define',
+        component: () => import('@/views/compose/Define.vue')
+      },
+      {
+        path: 'gridding',
+        component: () => import('@/views/compose/Gridding.vue')
+      },
+      {
+        path: 'navigate',
+        component: () => import('@/views/compose/Navigate.vue')
+      },
+      {
+        path: 'edit',
+        component: () => import('@/views/compose/Edit.vue')
+      }
+    ]
   }
 ]
 
