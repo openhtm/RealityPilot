@@ -4,8 +4,10 @@ import { Graph, astar } from './astar';
 
 class GridMap{
   // point cloud
-  pcd = null;
   points = null;
+  // transform
+  position = null;
+  rotation = null;
   // grid
   grid = null;
   size = null;
@@ -21,38 +23,12 @@ class GridMap{
     this.rpw = null;
   }
 
-  // load point cloud file
-  loadPLY(url, callback = ()=>{}, loading = ()=>{}){
-    new PLYLoader().load(url,
-      (geometry) => {
-        var points_arr = new THREE.Points(geometry).geometry.attributes.position.array;
-        this.pcd = []
-        for(var i = 0; i < points_arr.length; i += 3){
-          var p = new THREE.Vector3(points_arr[i], points_arr[i + 1], points_arr[i + 2]);
-          this.pcd.push(p);
-        }
-
-        callback(this.pcd);
-      },
-      (xhr) => {
-        loading(xhr);
-      },
-      (err) => {
-        console.log(err);
-      }
-    )
-  }
-
   // set plane
-  define(position, rotation) {
+  define(size, position, rotation) {
     // transform
-    this.points = []
-    this.pcd.forEach((point) => {
-      var p = point.clone();
-      p.applyEuler(rotation);
-      p.add(position);
-      this.points.push(p);
-    })
+    this.size = size;
+    this.position = position;
+    this.rotation = rotation;
 
     // calculate transform matrix
     this.rpw = new THREE.Matrix4().makeRotationFromEuler(rotation);
@@ -62,6 +38,26 @@ class GridMap{
     this.twp = this.tpw * -1;
   
     return this;
+  }
+
+  // set point
+  setData(points) {
+    this.points = [];
+    points.forEach((point) => {
+      var p = point.clone();
+      p.applyEuler(this.rotation);
+      p.add(this.position);
+      this.points.push(p);
+    })
+
+    return this;
+  }
+
+  // set grid
+  setGrid(grid) {
+    this.grid = grid;
+    this.graph = new Graph(this.grid);
+    return this.grid;
   }
 
   // threshold
@@ -75,11 +71,10 @@ class GridMap{
   }
 
   // flatten
-  flatten(size, division) {
-    this.size = size;
+  flatten(division) {
     this.division = division;
-    const resolution = size / division;
-    const half_size = size / 2;
+    const resolution = this.size / division;
+    const half_size = this.size / 2;
     
     // flatten
     var point_flatten = this.points.map((point) => {
@@ -89,7 +84,7 @@ class GridMap{
 
     // define grid
     this.grid = new Array(division).fill().map(() => {
-      return new Array(division).fill(0);
+      return new Array(division).fill(1);
     })
 
     // set grids
@@ -100,7 +95,7 @@ class GridMap{
       if(x < 0 || x >= division || z < 0 || z >= division)
         return;
       
-      this.grid[division - 1 - z][x]++;
+      this.grid[z][x] = 0;
     });
 
     this.graph = new Graph(this.grid);
@@ -109,13 +104,8 @@ class GridMap{
 
   // search
   search(start, end) {
-    var start_x = Math.floor((start.x + this.size / 2) / (this.size / this.division));
-    var start_z = Math.floor((start.z + this.size / 2) / (this.size / this.division));
-    var end_x = Math.floor((end.x + this.size / 2) / (this.size / this.division));
-    var end_z = Math.floor((end.z + this.size / 2) / (this.size / this.division));
-
-    var start_node = this.graph.grid[start_z][start_x];
-    var end_node = this.graph.grid[end_z][end_x];
+    var start_node = this.graph.grid[start.x][start.y];
+    var end_node = this.graph.grid[end.x][end.y];
 
     var result = astar.search(this.graph, start_node, end_node);
     return result;
