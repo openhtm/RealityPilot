@@ -55,9 +55,34 @@
     />
 
   </v-navigation-drawer>
-  <v-main class="pt-8">
-    <router-view></router-view>
+  <v-main>
+    <router-view 
+      :UID="UID"
+      :targetAt="targetAt"
+      :getScene="getScene" 
+      :getPointCloud="getPointCloud"
+    />
   </v-main>
+
+<!-- waiting dialog -->
+<v-dialog v-model="Waiting" persistent  width="auto"
+  style="background: rgba(0,0,0,0.1); backdrop-filter: blur(20px);"
+  class="d-flex justify-center align-center"
+>
+  <div style="width: 200px; height: 60px;"
+    class="d-flex flex-column align-center justify-center"
+  >
+    <p class="text-h6 mb-2 text-white">Loading Scene</p>
+    <v-progress-linear   
+      rounded
+      height="6"
+      v-model="Percentage"
+      color="white"
+    />
+  </div>
+  
+</v-dialog>
+
 </v-app>
 </template>
 
@@ -65,10 +90,13 @@
 import {ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import NavButton from '@/layout/NavButton.vue';
+import {loadPointCloud, loadScene} from '@/plugins/retrieve';
 
 const Router = useRouter();
 const UID = Router.currentRoute.value.params.uid;
 
+///***************************************************************
+// Navigation
 const PreviewRef = ref(null);
 const StepsRef = ref(null);
 const EditRef = ref(null);
@@ -144,19 +172,96 @@ function back() {
   Router.push('/');
 }
 
+///***************************************************************
+// Mesh
+const Waiting = ref(false);
+const Percentage = ref(0);
+// index 0 for scene, index 1 for pointcloud
+let percents = [0,0];
+let sharedPromise = [null, null];
+let Scene = null;
+let PointCloud = null;
 
+async function createScenePromise() {
+  return new Promise((resolve, reject) => {
+    if(Scene) resolve(Scene);
+    else {
+      loadScene(UID, (scene) => {
+        percents[0] = 100;
+        Percentage.value = (percents[0] + percents[1]) / 2;
 
-onMounted(() => {
-  // get router path
+        Scene = scene;
+        resolve(Scene);
+
+        if(Percentage.value >= 100) Waiting.value = false;
+      },
+      (xhr) => {
+        percents[0] = xhr.loaded / xhr.total * 100;
+        Percentage.value = (percents[0] + percents[1]) / 2;
+      })
+    }
+  })
+
+}
+
+async function createPointCloudPromise() {
+  return new Promise((resolve, reject) => {
+    if(PointCloud) resolve(PointCloud);
+    else {
+      loadPointCloud(UID, (pcd, arr) => {
+        percents[1] = 100;
+        Percentage.value = (percents[0] + percents[1]) / 2;
+
+        PointCloud = {
+          geometry: pcd,
+          array: arr
+        }
+        resolve(PointCloud)
+        
+        if(Percentage.value >= 100) Waiting.value = false;
+      },
+      (xhr) => {
+        percents[1] = xhr.loaded / xhr.total * 100;
+        Percentage.value = (percents[0] + percents[1]) / 2;
+      })
+    }
+  })
+  
+}
+
+function getScene() {
+  if(!sharedPromise[0]) sharedPromise[0] = createScenePromise();
+  return sharedPromise[0];
+}
+
+function getPointCloud() {
+  if(!sharedPromise[1]) sharedPromise[1] = createPointCloudPromise();
+  return sharedPromise[1];
+}
+
+///***************************************************************
+// get part
+function getCurrentPart() {
   const path = Router.currentRoute.value.path;
   var parts = path.split('/');
 
-  if(parts.length == 3) parts.push('preview')
+  if(parts.length == 3) parts.push('preview');
+  return parts[3]
+}
+// Mout
+onMounted(() => {
+  // get router path
+  const part = getCurrentPart();
 
-  if(Disabled.data.includes(parts[3])) 
+  if(Disabled.data.includes(part)) 
     targetAt('preview')
-  else
-    SelectedAt(parts[3])
+  else {
+    SelectedAt(part)
+  }
+
+  Waiting.value = true;
+  getScene();
+  getPointCloud();
 })
 
 </script>

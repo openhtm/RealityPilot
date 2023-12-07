@@ -44,7 +44,9 @@ renderer.setPixelRatio( window.devicePixelRatio );
 const camera = new THREE.PerspectiveCamera( props.fov, 4 / 3, props.near, props.far );
 scene.add(camera)
 
-const orbit = new OrbitControls( camera, renderer.domElement );
+const orbit = new OrbitControls( camera, renderer.domElement);
+orbit.maxDistance = props.far;
+orbit.minDistance = props.near;
 
 // const light = new THREE.AmbientLight(0xFFFFFF, 3);
 const light = new THREE.DirectionalLight(0xffffff, 1);
@@ -166,8 +168,6 @@ function createTransformControl(onMouseDown=()=>{}, onMouseUp=()=>{}) {
 onMounted(() => {
   if(props.orbit) {
     orbit.addEventListener( 'change', render ); // use if there is no animation loop
-		orbit.minDistance = 0.01;
-		orbit.maxDistance = 10;
   }
 })
 

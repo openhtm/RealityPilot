@@ -71,10 +71,6 @@ function openReview(id) {
   Router.push('/session/review/'+id)
 }
 
-const Scenes = reactive({
-
-})
-
 onMounted(() => {
   Reviews.data = {};
   queryScenes().then(data => {

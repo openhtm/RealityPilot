@@ -27,7 +27,7 @@ const routes = [
     component: () => import('@/views/Session.vue')
   },
   {
-    path: '/Compose/:uid',
+    path: '/compose/:uid',
     component: () => import('@/views/Compose.vue'),
     children: [
       {
