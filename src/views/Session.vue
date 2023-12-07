@@ -32,7 +32,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
-import Session from '@/components/WebSFM.vue'
+import Session from '@/components/WebSfM.vue'
 import { useRouter } from 'vue-router';
 
 const Router = useRouter();

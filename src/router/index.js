@@ -4,19 +4,19 @@ import { createRouter, createWebHistory } from 'vue-router'
 const routes = [
   {
     path: '/',
-    component: () => import('@/Index.vue'),
+    component: () => import('@/views/Index.vue'),
     children: [
       {
         path: '',
-        component: () => import('@/views/Overview.vue'),
+        component: () => import('@/views/index/Overview.vue'),
       },
       {
         path: 'start',
-        component: () => import('@/views/Start.vue'),
+        component: () => import('@/views/index/Start.vue'),
       },
       {
         path: 'about',
-        component: () => import('@/views/About.vue')
+        component: () => import('@/views/index/About.vue')
       },
       
     ],
@@ -28,7 +28,7 @@ const routes = [
   },
   {
     path: '/Compose/:uid',
-    component: () => import('@/Compose.vue'),
+    component: () => import('@/views/Compose.vue'),
     children: [
       {
         path: '',

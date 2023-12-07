@@ -22,7 +22,7 @@
     <div class="mt-2"></div>
 
     <!-- preview button -->
-    <targets-button 
+    <nav-button 
       ref="PreviewRef"
       :targets="Preview"
       :action="targetAt"
@@ -33,7 +33,7 @@
       Steps
     </p>
     <!-- steps button -->
-    <targets-button 
+    <nav-button 
       ref="StepsRef"
       :targets="Steps"
       :action="targetAt"
@@ -47,7 +47,7 @@
     </p>
 
     <!-- edit button -->
-    <targets-button 
+    <nav-button 
       ref="EditRef"
       :targets="Edit"
       :action="targetAt"
@@ -64,7 +64,7 @@
 <script setup>
 import {ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import TargetsButton from '@/layout/TargetsButton.vue';
+import NavButton from '@/layout/NavButton.vue';
 
 const Router = useRouter();
 const UID = Router.currentRoute.value.params.uid;
@@ -74,7 +74,7 @@ const StepsRef = ref(null);
 const EditRef = ref(null);
 
 const Disabled = reactive({
-  data: ['define']
+  data: ['edit']
 });
 
 const Preview = {
@@ -143,6 +143,8 @@ function SelectedAt(key){
 function back() {
   Router.push('/');
 }
+
+
 
 onMounted(() => {
   // get router path

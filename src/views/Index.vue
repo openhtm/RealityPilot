@@ -15,7 +15,7 @@
     <div class="mt-2"></div>
 
     <!-- targets button -->
-    <targets-button 
+    <nav-button
       ref="TargetRef"
       :targets="Targets"
       :action="targetAt"
@@ -38,7 +38,7 @@
 <script setup>
 import {ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import TargetsButton from '@/layout/TargetsButton.vue';
+import NavButton from '@/layout/NavButton.vue';
 
 const Router = useRouter();
 const TargetRef = ref(null);

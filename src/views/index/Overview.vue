@@ -4,25 +4,25 @@
   
   <p class="text-h6 font-weight-bold ml-2">Ready</p>
   <template v-for="(value, key) in Reviews.ready">
-    <DetailCard :value="value" :onRemove="removeData" :onClick="compose" />
+    <detail-card :value="value" :onRemove="removeData" :onClick="compose" />
   </template>
 
   <div class="mt-10"></div>
 
   <p class="text-h6 font-weight-bold ml-2">Raw</p>
   <template v-for="(value, key) in Reviews.raw">
-    <DetailCard :value="value" :onRemove="removeData" :onClick="compose" />
+    <detail-card :value="value" :onRemove="removeData" :onClick="compose" />
   </template>
 
   <template v-for="(value, key) in Reviews.wait">
-    <DetailCard :value="value" :onRemove="removeData" />
+    <detail-card :value="value" :onRemove="removeData" />
   </template>
 
   <div class="mt-10"></div>
 
   <p class="text-h6 font-weight-bold ml-2">Damaged</p>
   <template v-for="(value, key) in Reviews.fail">
-    <DetailCard :value="value" :onRemove="removeData" />
+    <detail-card :value="value" :onRemove="removeData" />
   </template>
 
 </div>
