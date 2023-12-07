@@ -74,7 +74,7 @@ function openReview(id) {
 onMounted(() => {
   Reviews.data = {};
   queryScenes().then(data => {
-    console.log(data);
+    // console.log(data);
     // filter
     for(let id in data) {
       let item = data[id];

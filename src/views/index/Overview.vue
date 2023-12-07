@@ -57,7 +57,6 @@ function removeData(uid) {
 
 function queryData() {
   queryScenes().then(data => {
-    console.log(data);
     // filter
     for(let id in data) {
       let item = data[id];
@@ -70,8 +69,7 @@ function queryData() {
       else
         Reviews.fail[id] = item;
     }
-
-    console.log(Reviews)
+    // console.log(Reviews)
   })
 }
 

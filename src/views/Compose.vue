@@ -182,10 +182,11 @@ let sharedPromise = [null, null];
 let Scene = null;
 let PointCloud = null;
 
-async function createScenePromise() {
+async function createScenePromise(alone = false) {
   return new Promise((resolve, reject) => {
     if(Scene) resolve(Scene);
     else {
+      Waiting.value = true;
       loadScene(UID, (scene) => {
         percents[0] = 100;
         Percentage.value = (percents[0] + percents[1]) / 2;
@@ -193,7 +194,7 @@ async function createScenePromise() {
         Scene = scene;
         resolve(Scene);
 
-        if(Percentage.value >= 100) Waiting.value = false;
+        if(alone || Percentage.value >= 100) Waiting.value = false;
       },
       (xhr) => {
         percents[0] = xhr.loaded / xhr.total * 100;
@@ -204,10 +205,11 @@ async function createScenePromise() {
 
 }
 
-async function createPointCloudPromise() {
+async function createPointCloudPromise(alone = false) {
   return new Promise((resolve, reject) => {
     if(PointCloud) resolve(PointCloud);
     else {
+      Waiting.value = true;
       loadPointCloud(UID, (pcd, arr) => {
         percents[1] = 100;
         Percentage.value = (percents[0] + percents[1]) / 2;
@@ -218,7 +220,7 @@ async function createPointCloudPromise() {
         }
         resolve(PointCloud)
         
-        if(Percentage.value >= 100) Waiting.value = false;
+        if(alone || Percentage.value >= 100) Waiting.value = false;
       },
       (xhr) => {
         percents[1] = xhr.loaded / xhr.total * 100;
@@ -229,13 +231,13 @@ async function createPointCloudPromise() {
   
 }
 
-function getScene() {
-  if(!sharedPromise[0]) sharedPromise[0] = createScenePromise();
+function getScene(alone = false) {
+  if(!sharedPromise[0]) sharedPromise[0] = createScenePromise(alone);
   return sharedPromise[0];
 }
 
-function getPointCloud() {
-  if(!sharedPromise[1]) sharedPromise[1] = createPointCloudPromise();
+function getPointCloud(alone = false) {
+  if(!sharedPromise[1]) sharedPromise[1] = createPointCloudPromise(alone);
   return sharedPromise[1];
 }
 
@@ -259,9 +261,8 @@ onMounted(() => {
     SelectedAt(part)
   }
 
-  Waiting.value = true;
-  getScene();
-  getPointCloud();
+  // getScene();
+  // getPointCloud();
 })
 
 </script>

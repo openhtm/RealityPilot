@@ -1,7 +1,7 @@
 <template>
 <div id="renderbox" class="fill-height" style="position: relative; z-index:1;">
   <!-- reset-->
-  <div style="position: absolute; z-index: 10; top:20px; left:20px">
+  <div style="position: absolute; z-index: 20; top:20px; left:20px">
     <v-btn  rounded="lg" variant="flat"
       style="background: rgba(0,0,0,0.2); backdrop-filter: blur(10px);"
       @click="reset"
@@ -16,16 +16,16 @@
   > 
     <v-btn-group rounded="lg" elevation="0"  density="comfortable" color="white">
       <v-btn size="small" @click="setTransMode('translate')">
-        <v-icon color="primary">mdi-axis-arrow</v-icon>
+        <v-icon size="x-large" color="primary">mdi-axis-arrow</v-icon>
       </v-btn>
       <v-btn size="small" @click="setTransMode('rotate')">
-        <v-icon color="primary">mdi-rotate-orbit</v-icon>
+        <v-icon size="x-large" color="primary">mdi-rotate-orbit</v-icon>
       </v-btn>
       <v-btn size="small" @click="step(false)">
-        <v-icon color="primary">mdi-minus</v-icon>
+        <v-icon size="x-large" color="primary">mdi-minus</v-icon>
       </v-btn>
       <v-btn size="small" @click="step(true)">
-        <v-icon color="primary">mdi-plus</v-icon>
+        <v-icon size="x-large" color="primary">mdi-plus</v-icon>
       </v-btn>
     </v-btn-group>
   </div>
@@ -52,13 +52,11 @@
 
 <script setup>
 import { onMounted, ref, reactive, toRaw } from 'vue';
-import { useRouter } from 'vue-router';
 import * as THREE from 'three'
 import Render from '@/components/Render';
 
 import {queryDetail} from '@/plugins/retrieve'
 
-const Router = useRouter();
 const props = defineProps({
   UID: {
     type: String,
@@ -82,16 +80,23 @@ const SceneRef = ref(null);
 var Scene;
 var Mesh = null;
 var trans_control = null;
-var Points = []
 
-const RawPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0),0);
-var Plane = new THREE.PlaneHelper(RawPlane, 10, 0x333333)
 var Size = 10;
+var Define = {
+  position: {x: 0, y: 0, z: 0},
+  rotation: {_x: 0, _y: 0, _z: 0},
+  size: Size
+}
+const RawPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0),0);
+var Plane = new THREE.PlaneHelper(RawPlane, Size, 0x333333)
 
 ///***************************************************************
 // Preview
 function reset() {
-  window.location.reload()
+  Mesh.position.set(Define.position.x, Define.position.y, Define.position.z);
+  Mesh.rotation.set(Define.rotation._x, Define.rotation._y, Define.rotation._z);
+  resetPlane(Define.size);
+  Scene.render();
 }
 
 function setTransMode(mode) {
@@ -159,29 +164,21 @@ onMounted(() => {
   })
   Scene.start();
 
-  props.getScene()
+  props.getScene(true)
   .then((mesh) => {
     Mesh = mesh.clone();
 
     queryDetail(props.UID)
     .then(data => {
-      if(data['define'] != undefined) {
-        var define = data['define'];
-        Mesh.position.set(define.position.x, define.position.y, define.position.z);
-        Mesh.rotation.set(define.rotation._x, define.rotation._y, define.rotation._z);
-        resetPlane(define.size);
-      }
-
       Scene.addObject(Mesh);
       trans_control.attach(Mesh);
+
+      if(data['define'] != undefined)
+        Define = data['define'];
+      
+      reset();
     })
   })
-
-  props.getPointCloud()
-  .then((pcd) => {
-    Points = pcd.array.concat();
-  })
-
 
   Scene.addObject(new THREE.AxesHelper(1));
   
