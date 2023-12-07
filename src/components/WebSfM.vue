@@ -142,6 +142,7 @@ function switchStream() {
   if(Number(FrameType.value) == 0) {
     video.srcObject = image_stream;
   } else {
+    context.clearRect(0, 0, canvas.width, canvas.height);
     video.srcObject = remote_stream;
   }
   video.play();
@@ -173,7 +174,8 @@ function setDataChannelHanderler() {
       case 'features':
         event.channel.onmessage = (evt) => {
           features = JSON.parse(evt.data);
-          drawFeatures();
+          if(FrameType.value == 0)
+            drawFeatures();
         }
         break;
       case 'state':
