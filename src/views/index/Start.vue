@@ -34,7 +34,7 @@
     >
       <v-btn 
         style="position: absolute; right:25px; top:25px"
-        icon="mdi-play" color="green" size="small" elevation="0"
+        icon="mdi-play" color="primary" size="small" elevation="0"
         @click="openReview(key)"
       />
       

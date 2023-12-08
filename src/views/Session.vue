@@ -4,7 +4,14 @@
     <!-- session dialog (fullscreen) -->
     <v-dialog v-model="Dialog" persistent fullscreen>
       <v-card class="fill-height overflow-hidden" color="grey-darken-3">
-        <Session ref="SessionRef" :onCancel="onCancel" :onComplete="onComplete"/>
+        <div v-if="Type === 'review'" 
+          id="renderbox" style="position: absolute; width: 100%; height: 100% ;z-index:5;"
+        >
+          <render style="z-index: 5;"
+            ref="SceneRef"
+          />
+        </div>
+        <Session ref="SessionRef" :Type="Type" :UID="UID" :onCancel="onCancel" :onComplete="onComplete"/>
       </v-card>
     </v-dialog>
 
@@ -26,6 +33,8 @@
       </div>
       
     </v-dialog>
+
+    
   </v-main>
 </v-app>
 </template>
@@ -33,6 +42,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import Session from '@/components/WebSfM.vue'
+import Render from '@/components/Render';
 import { useRouter } from 'vue-router';
 
 const Router = useRouter();
