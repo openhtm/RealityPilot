@@ -190,11 +190,10 @@ async function createScenePromise(alone = false) {
       loadScene(UID, (scene) => {
         percents[0] = 100;
         Percentage.value = (percents[0] + percents[1]) / 2;
-
         Scene = scene;
-        resolve(Scene);
 
         if(alone || Percentage.value >= 100) Waiting.value = false;
+        resolve(Scene);
       },
       (xhr) => {
         percents[0] = xhr.loaded / xhr.total * 100;
@@ -218,9 +217,9 @@ async function createPointCloudPromise(alone = false) {
           geometry: pcd,
           array: arr
         }
-        resolve(PointCloud)
-        
+
         if(alone || Percentage.value >= 100) Waiting.value = false;
+        resolve(PointCloud)
       },
       (xhr) => {
         percents[1] = xhr.loaded / xhr.total * 100;

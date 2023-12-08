@@ -84,30 +84,14 @@
     </div>
   </div>
 
-
-<!-- waiting dialog -->
-<v-dialog v-model="Wait" persistent width="auto"
-  style="background: rgba(0,0,0,0.1); backdrop-filter: blur(20px);"
-  class="d-flex justify-center align-center"
->
-  <div style="width: 200px; height: 60px;"
-    class="d-flex flex-column align-center justify-center"
-  >
-    <p class="text-h6 mb-2 text-white">Flattening</p>
-    <v-progress-linear   
-      rounded
-      height="6"
-      indeterminate
-      color="white"
-    />
-  </div>
-</v-dialog>
+<loading ref="LoadingRef" Text="Flattening" />
 </div>
 </template>
 
 <script setup>
 import { onMounted, ref, reactive, toRaw } from 'vue';
 import SlideBar from '@/layout/SlideBar.vue'
+import Loading from '@/layout/Loading.vue'
 import GridMap from '@/plugins/map'
 import {queryDetail} from '@/plugins/retrieve'
 
@@ -123,10 +107,11 @@ const props = defineProps({
   getPointCloud: {
     type: Function,
     required: true
-  }
+  },
+  getScene: null
 })
 
-const Wait = ref(false);
+const LoadingRef = ref(null);
 
 const SettingRefs = []
 const Settings = {
@@ -177,7 +162,7 @@ function reset() {
 
 // flatten grid map from pointcloud
 function onChange() {
-  Wait.value = true;
+  LoadingRef.value.show();
 
   const div = SettingRefs[0].getVal();
   const min = SettingRefs[1].getVal();
@@ -186,7 +171,9 @@ function onChange() {
   setTimeout(() => {
     GridArray.data = Grid.setData(Points).filter(min, max).flatten(div);
     resetGridSize();
-    Wait.value = false;
+    setTimeout(() => {
+      LoadingRef.value.hide();
+    }, 500);
   }, 500);
 }
 
