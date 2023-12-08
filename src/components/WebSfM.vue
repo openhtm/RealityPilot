@@ -41,7 +41,7 @@
   <!-- guide -->
   <div v-if="Available" style="position: absolute; z-index: 15; width: 460px; top:80px; left:20px;"
     class="align-self-center">
-    <v-alert v-if="State[0] != 2"
+    <v-alert v-if="State[0]==0 || State[0]==1 || State[0]==3 || State[0]==4"
       v-model="AlertFlag"
       closable
       class="text-white"
@@ -90,7 +90,7 @@
       :color="State[0] == 2 ? 'success' : State[0] == 3 ? 'warning' : State[0] == 1 ? 'orange' : 'grey'"
     />
     <p class="text-body-1 text-white font-weight-bold ml-2">
-      {{props.Type == 'create' ? 'Create Mode,' : 'Review Mode'}}
+      {{props.Type == 'create' ? 'Create Mode,' : 'Review Mode,'}}
       {{ State[1] }} Keyframes and {{ State[2] }} Mappoints
     </p>
   </v-btn>
@@ -253,13 +253,22 @@ function getPosition() {
   return Twc;
 }
 
+var SuccessCnt = -1;
 function onStateUpdate(state) {
   // tracking lost or bad init
-  if(State[0] == 2 && state[0] != 2)
+  if(State[0] == 2 && state[0] != 2) {
+    SuccessCnt = 0;
     switchStream(0);
-  // switch to origin stream if recovering from lost
-  if(State[0] == 3 && state[0] == 2)
+  }
+  // count success times
+  if(state[0] == 2 && SuccessCnt >= 0)
+    SuccessCnt++;
+  // switch to intent if stable
+  if(state[0] == 2 && SuccessCnt > (props.Type === 'create' ? 10 : 30)){
     switchStream(IntentFrameType);
+    SuccessCnt = -1;
+  }
+  
   // set alert flag on state update
   if(State[0] != state[0] && state[0] != 2)
     AlertFlag.value = true;
@@ -347,7 +356,8 @@ function negotiate() {
     return response.json();
   })
   .then((answer) => {
-    return pc.setRemoteDescription(answer);
+    if(answer.status) return pc.setRemoteDescription(answer);
+    else throw answer.msg;
   })
   .catch((e) => alert(e));
 }
