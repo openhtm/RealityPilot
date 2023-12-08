@@ -161,7 +161,7 @@ function reset() {
 }
 
 // flatten grid map from pointcloud
-function onChange() {
+function onChange(val = null) {
   LoadingRef.value.show();
 
   const div = SettingRefs[0].getVal();
@@ -170,7 +170,7 @@ function onChange() {
 
   setTimeout(() => {
     GridArray.data = Grid.setData(Points).filter(min, max).flatten(div);
-    resetGridSize();
+    resetGridSize(val);
     setTimeout(() => {
       LoadingRef.value.hide();
     }, 500);
@@ -238,7 +238,7 @@ function setMarkType(val){
 
 function markAt(x, y) {
   // console.log(x, y);
-  if(MarkType.value == -1) return searchAt(x, y);
+  if(MarkType.value == -1) return;
   GridArray.data[x][y] = MarkType.value;
 }
 
@@ -279,7 +279,7 @@ onMounted(() => {
       
       } else {
         // flatten through data
-        onChange();
+        onChange(0);
       }
     })
   })

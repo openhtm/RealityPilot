@@ -63,8 +63,7 @@ class GridMap{
   // threshold
   filter(min = 0, max = Infinity) {
     this.points = this.points.filter((point) => {
-      var y = Math.abs(point.y);
-      return y >= min && y <= max;
+      return point.y >= 0 && point.y >= min && point.y <= max;
     });
 
     return this;
