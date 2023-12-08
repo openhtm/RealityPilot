@@ -30,6 +30,9 @@ const props = defineProps({
   },
   onFrame: {
     type: Function, default: () => {}
+  },
+  ambient: {
+    type: Number, default: 1
   }
 })
 
@@ -48,9 +51,8 @@ const orbit = new OrbitControls( camera, renderer.domElement);
 orbit.maxDistance = props.far;
 orbit.minDistance = props.near;
 
-// const light = new THREE.AmbientLight(0xFFFFFF, 3);
-const light = new THREE.DirectionalLight(0xffffff, 1);
-light.position.set(1, 1, 1).normalize();
+// basic ambient light
+const light = new THREE.AmbientLight(0xFFFFFF, props.ambient);
 scene.add(light);
 
 // on frame

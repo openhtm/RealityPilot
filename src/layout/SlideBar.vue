@@ -5,20 +5,20 @@
     <v-card variant="flat" rounded="lg" :height="props.height"
       class="d-flex justify-center align-center px-1 mr-3"
     >
-    <v-slider v-model="Division" :min="props.data.min" :max="props.data.max" :step="props.data.step"
+    <v-slider v-model="RawValue" :min="props.data.min" :max="props.data.max" :step="props.data.step"
       :style="'width:' + props.width + 'px;height:32px;'"
       color="primary" elevation="0" density="comfortable"
-      @end="props.data.onEnd"
+      @end="props.data.onEnd(RawValue)"
     >
       <template v-slot:prepend>
         <v-btn size="small" density="comfortable" variant="text" icon="mdi-minus" color="info"
-          :disabled="Division <= props.data.min"
+          :disabled="RawValue <= props.data.min"
           @click="changeDivision(false)"
         />
       </template>
       <template v-slot:append>
         <v-btn size="small" density="comfortable" variant="text" icon="mdi-plus" color="info"
-          :disabled="Division >= props.data.max"
+          :disabled="RawValue >= props.data.max"
           @click="changeDivision(true)"
         />
         </template>
@@ -31,7 +31,7 @@
     variant="flat" rounded="lg" :height="props.height" :width="props.height"
     class="d-flex justify-center align-center"
   >
-    <p class="text-subtitle-2 font-weight-bold">{{ Division.toFixed(Fixed) }}</p>
+    <p class="text-subtitle-2 font-weight-bold">{{ RawValue.toFixed(Fixed) }}</p>
   </v-card>
 </div>
 </template>
@@ -59,30 +59,32 @@ const props = defineProps({
   }
 })
 
-const Division = ref(props.data.default);
-const Visible = ref('none');
+const RawValue = ref(props.data.default);
+const Visible = ref('block');
 const Fixed = props.data.step < 0.1 ? 2 :
               props.data.step < 1 ? 1 : 0;
 
 function reset() {
-  Division.value = props.data.default;
+  RawValue.value = props.data.default;
+  Visible.value = 'block';
 }
 
 function changeDivision(positive) {
-  if(positive && Division.value >= props.data.max)
+  if(positive && RawValue.value >= props.data.max)
     return;
-  if(!positive && Division.value <= props.data.min)
+  if(!positive && RawValue.value <= props.data.min)
     return;
 
-  Division.value += (positive ? props.data.step : -1 * props.data.step);
+  RawValue.value += (positive ? props.data.step : -1 * props.data.step);
 }
 
 function changeVisible() {
   Visible.value = Visible.value == 'none' ? 'block' : 'none';
 }
 
-function setVal(val) {
-  Division.value = val;
+function setDefault(val) {
+  props.data.default = val;
+  RawValue.value = val;
 }
 
 onMounted(() => {
@@ -91,8 +93,8 @@ onMounted(() => {
 defineExpose({
   reset,
   changeVisible,
-  setVal,
-  getVal: () => {return Division.value;} 
+  setDefault,
+  getVal: () => {return RawValue.value;} 
 })
 
 </script>

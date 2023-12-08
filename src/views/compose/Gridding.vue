@@ -1,5 +1,5 @@
 <template>
-<div id="renderbox" class="fill-height" style="position: relative; z-index:1;">
+<div id="renderbox" class="fill-height overflow-x-auto" style="position: relative; z-index:1;">
   <!-- reset-->
   <div style="position: absolute; z-index: 20; top:20px; left:20px">
     <v-btn  rounded="lg" variant="flat"
@@ -8,6 +8,30 @@
     >
       <p class="text-body-1 text-white font-weight-bold">Reset</p>
     </v-btn>
+  </div>
+
+  <!-- toolkit -->
+  <div style="position: absolute; z-index: 10; top:20px; width: 100%;"
+    class="d-flex justify-center align-center"
+  > 
+    <v-btn-group rounded="lg" elevation="0"  density="comfortable" color="white">
+      <v-btn size="small" @click="setMarkType(1)" :color="MarkType == 1 ? 'primary' : 'white'">
+        <v-icon size="x-large" :color="MarkType == 1 ? 'white' : 'primary'">
+          mdi-checkbox-blank-outline
+        </v-icon>
+      </v-btn>
+      <v-btn size="small" @click="setMarkType(0)" :color="MarkType == 0 ? 'primary' : 'white'">
+        <v-icon size="x-large" :color="MarkType == 0 ? 'white' : 'primary'">
+          mdi-close
+        </v-icon>
+      </v-btn>
+      <v-btn size="small" @click="resetGridSize(-1)">
+        <v-icon size="x-large" color="primary">mdi-minus</v-icon>
+      </v-btn>
+      <v-btn size="small" @click="resetGridSize(1)">
+        <v-icon size="x-large" color="primary">mdi-plus</v-icon>
+      </v-btn>
+    </v-btn-group>
   </div>
 
   <!-- adjust bars -->
@@ -52,6 +76,7 @@
           <div v-for="(cell, colIndex) in row" 
             style="border: 0.5px solid #ccc;"
             :style="(cell == 0 ? 'background-color: #424242;' : '') + GridStyle"
+            @click="markAt(rowIndex, colIndex)"
           >
           </div>
         </div>
@@ -142,34 +167,15 @@ function changeVisible(idx) {
   SettingRefs[idx].changeVisible();
 }
 
-function resetGridSize() {
-  const gridmap = document.getElementById('gridmap')
-  const width = gridmap.offsetWidth, height = gridmap.offsetHeight;
-  const size = width > height ? height : width;
-
-  const col = size / SettingRefs[0].getVal();
-  GridStyle.value = 'width:' + col + 'px; height:' + col + 'px;'
-  
-  // console.log('reset grid size to ' + col + 'px');
-}
-
-///***************************************************************
-// grid map
-const Grid = new GridMap();
-const GridArray = reactive({
-  data: [[]]
-})
-var Points = []
-
-const GridStyle = ref('')
-
 function reset() {
   SettingRefs.forEach(item => {
     item.reset();
+    item.changeVisible();
   })
   onChange();
 }
 
+// flatten grid map from pointcloud
 function onChange() {
   Wait.value = true;
 
@@ -182,6 +188,31 @@ function onChange() {
     resetGridSize();
     Wait.value = false;
   }, 500);
+}
+
+///***************************************************************
+// grid map
+const Grid = new GridMap();
+const GridArray = reactive({
+  data: [[]]
+})
+var Points = []
+
+const GridStyle = ref('')
+var MaxWidth = 0;
+
+function resetGridSize(mode = null) {
+  const gridmap = document.getElementById('gridmap');
+  const width = gridmap.offsetWidth, height = gridmap.offsetHeight;
+  if(mode == 0)
+    MaxWidth = Math.min(width, height);
+  else if(mode == -1)
+    MaxWidth = Math.floor(MaxWidth * 0.8);
+  else if(mode == 1)
+    MaxWidth = Math.floor(MaxWidth * 1.2);
+  
+  const col = MaxWidth / SettingRefs[0].getVal();
+  GridStyle.value = 'width:' + col + 'px; height:' + col + 'px;'
 }
 
 function save() {
@@ -210,10 +241,29 @@ function save() {
   .catch(err => alert(err))
 }
 
+///***************************************************************
+// landmark
+const MarkType = ref(-1);
+
+function setMarkType(val){
+  MarkType.value = (MarkType.value == val ? -1 : val);
+}
+
+function markAt(x, y) {
+  // console.log(x, y);
+  if(MarkType.value == -1) return searchAt(x, y);
+  GridArray.data[x][y] = MarkType.value;
+}
+
 
 ///***************************************************************
 // Mounted
 onMounted(() => {
+  SettingRefs.forEach(item => {
+    item.changeVisible();
+  })
+
+  // query and set details
   queryDetail(props.UID)
   .then(data => {
     var define = data['define'];
@@ -233,12 +283,12 @@ onMounted(() => {
       Points = pcd.array.concat();
       if(gridinfo != undefined) {
         // reset detail
-        SettingRefs[0].setVal(gridinfo.division);
-        SettingRefs[1].setVal(gridinfo.mindist);
-        SettingRefs[2].setVal(gridinfo.maxdist),
+        SettingRefs[0].setDefault(gridinfo.division);
+        SettingRefs[1].setDefault(gridinfo.mindist);
+        SettingRefs[2].setDefault(gridinfo.maxdist),
         // set array
         GridArray.data = Grid.setGrid(gridinfo.array)
-        resetGridSize();
+        resetGridSize(0);
       
       } else {
         // flatten through data

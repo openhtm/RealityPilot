@@ -15,57 +15,36 @@
     class="d-flex justify-center align-center"
   > 
     <v-btn-group rounded="lg" elevation="0"  density="comfortable" color="white">
-      <v-btn size="small" @click="setMarkType(1)" :color="MarkType == 1 ? 'primary' : 'white'">
-        <v-icon size="x-large" :color="MarkType == 1 ? 'white' : 'primary'">
-          mdi-checkbox-blank-outline
-        </v-icon>
-      </v-btn>
-      <v-btn size="small" @click="setMarkType(0)" :color="MarkType == 0 ? 'primary' : 'white'">
-        <v-icon size="x-large" :color="MarkType == 0 ? 'white' : 'primary'">
-          mdi-close
-        </v-icon>
-      </v-btn>
-      <v-btn size="small" @click="setMarkType(2)" :color="MarkType == 2 ? 'primary' : 'white'">
-        <v-icon size="x-large" :color="MarkType == 2 ? 'white' : 'primary'">
-          mdi-map-marker-outline
-        </v-icon>
-      </v-btn>
     </v-btn-group>
+  </div>
+
+  <!-- bottom slider -->
+  <div style="position: absolute; z-index: 10; bottom:20px; width: 100%;">
+    <slide-bar
+      :height="40"
+      :data="Setting"
+    />
   </div>
 
   <!-- save -->
 
-  <!-- grid map -->
-  <div class="pa-16 fill-height">
-    <div id="gridmap" 
-      style="width: 100%; height: 100%;" 
-      class="d-flex justify-center align-center"
-    >
-      <div class="d-flex flex-column">
-        <div v-for="(row, rowIndex) in GridArray.data" :key="rowIndex" class="d-flex">
-          <div v-for="(cell, colIndex) in row" 
-            style="border: 0.5px solid #ccc;"
-            :style="(cell == 0 ? 'background-color: #424242;' : 
-                     cell == 2 ? 'background-color: #FF5722;' : 
-                     cell == 3 ? 'background-color: #4CAF50;' : '') 
-                    + GridStyle"
-            @click="markAt(rowIndex, colIndex)"
-          >
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <!-- render -->
+  <render
+    style="z-index: 1;"
+    ref="SceneRef"
+    :orbit="true"
+    :far="100"
+    :ambient="1"
+  />
 </div>
 </template>
 
 <script setup>
 import { onMounted, ref, reactive, toRaw } from 'vue';
-import GridMap from '@/plugins/map'
+import * as THREE from 'three'
+import Render from '@/components/Render';
+import SlideBar from '@/layout/SlideBar.vue'
 import {queryDetail} from '@/plugins/retrieve'
-import { withDirectives } from 'vue';
-import Start from '../index/Start.vue';
-import { LatheGeometry } from 'three';
 
 const props = defineProps({
   UID: {
@@ -75,95 +54,124 @@ const props = defineProps({
   targetAt: {
     type: Function,
     required: true
+  },
+  getScene: {
+    type: Function,
+    required: true
   }
 })
 
 ///***************************************************************
-// grid map
-const Grid = new GridMap();
-const GridArray = reactive({data: [[]]})
-const GridStyle = ref('')
+// Scene
+const SceneRef = ref(null);
+var Scene;
+var Mesh = null;
+var GridMesh = null;
+var trans_control = null;
 
-function resetGridSize(div) {
-  const gridmap = document.getElementById('gridmap')
-  const width = gridmap.offsetWidth, height = gridmap.offsetHeight;
-  const col = (width > height ? height : width) / div;
-  GridStyle.value = 'width:' + col + 'px; height:' + col + 'px;'
+var Define = {
+  position: {x: 0, y: 0, z: 0},
+  rotation: {_x: 0, _y: 0, _z: 0},
+  size: 10,
+  division: 64,
+  array: [[]]
+}
+var GridHelper = new THREE.GridHelper(10, 64, 0xCCCCCC, 0xCCCCCC);
+
+
+///***************************************************************
+// grid mesh
+const SettingRef = ref(null);
+const Setting = {
+  min: 0, max: 5,
+  step: 0.1,
+  default: 1,
+  onEnd: setGridMeshScale
+}
+
+function setGridMeshScale(val) {
+  if(GridMesh) {
+    GridMesh.scale.set(1, val, 1);
+    Scene.render();
+  }
+}
+
+function createGridMesh() {
+  var cnt = 0;
+  Define.array.forEach((row, rowid) => {
+    row.forEach((col, colid) => {
+      if(col == 0) cnt++;
+    })
+  })
+  // define basic
+  const half_size = Define.size / 2;
+  const resolution = Define.size / Define.division;
+  const geometry = new THREE.BoxGeometry(resolution, 0.5, resolution);
+  const material = new THREE.MeshPhongMaterial({ color: 0xffffff }); 
+  GridMesh = new THREE.InstancedMesh(geometry, material, cnt);
+  // fill in the instance
+  let instanceIndex = 0;
+  Define.array.forEach((row, rowid) => {
+    row.forEach((col, colid) => {
+      if(col == 0) {
+        const x = colid * resolution - half_size + resolution / 2;
+        const z = rowid * resolution - half_size + resolution / 2;
+        const position = new THREE.Vector3(x, 0.25, z);
+        GridMesh.setMatrixAt(instanceIndex++, new THREE.Matrix4().makeTranslation(position.x, position.y, position.z));
+      }
+    })
+  })
+  GridMesh.instanceMatrix.needsUpdate = true;
+  GridMesh.castShadow = true;
+  return GridMesh;
 }
 
 ///***************************************************************
-// landmark
-const MarkType = ref(-1);
-var Last = null;
-var Path = [];
-var interval_id = null;
-
-function setMarkType(val){
-  MarkType.value = (MarkType.value == val ? -1 : val);
-}
-
-function markAt(x, y) {
-  // console.log(x, y);
-  if(MarkType.value == -1) return searchAt(x, y);
-
-  if(GridArray.data[x][y] == 0 && MarkType.value == 2) return;
-  if(GridArray.data[x][y] == MarkType.value) return;
-    
-  GridArray.data[x][y] = MarkType.value;
-  Grid.setGrid(GridArray.data);
-}
-
-function searchAt(x, y) {
-  if(interval_id || GridArray.data[x][y] == 0) return;
-
-  if(!Last) {
-    Last = {x: x, y: y};
-    GridArray.data[x][y] = 3;
-  } else if(!(Last.x == x && Last.y == y)) {
-    let end = {x: x, y: y};
-
-    let result = Grid.search(Last, end);
-    if(result.length == 0) {
-      alert('No Available Path');
-      return;
-    }
-
-    reviewPath(result);
-    Last = end;
-  }
-}
-
-function reviewPath(result) {
-  Path.push(Last);
-  result.forEach(node => {
-    Path.push(node);
-  });
-
-  interval_id = setInterval(updatePath, 15);
-}
-
-function updatePath() {
-  if(Path.length == 1) {
-    let node = Path.shift();
-    GridArray.data[node.x][node.y] = 3;
-    clearInterval(interval_id);
-    interval_id = null;
-    return;
-  }
-
-  let node = Path.shift();
-  GridArray.data[node.x][node.y] = 1;
-
-  const max = (Path.length > 4 ? 4 : Path.length);
-  for(let i = 0; i < max; i++) {
-    let node = Path[i];
-    GridArray.data[node.x][node.y] = 3;
-  }
+function reset() {
+  // reset mesh
+  
+  Scene.render();
 }
 
 ///***************************************************************
+function onStart() {
+  // add light
+  const light = new THREE.DirectionalLight(0xFFFFFF, 3);
+  light.position.set(0, 10, 0);
+  light.target.position.set(-5, 0, 0)
+  Scene.addObject(light);
+  Scene.addObject(light.target);
+  // set basic
+  trans_control = Scene.createTransformControl();
+  Scene.setCameraPosition(2,2,8);
+  Scene.setCameraLookAt(0,0,0);
+  // add AxesHelper
+  Scene.addObject(new THREE.AxesHelper(1));
+  // add Main Mesh
+  Mesh.position.set(Define.position.x, Define.position.y, Define.position.z);
+  Mesh.rotation.set(Define.rotation._x, Define.rotation._y, Define.rotation._z);
+  Scene.addObject(Mesh);
+  // add GridHelper
+  GridHelper = new THREE.GridHelper(Define.size, Define.division, 0xCCCCCC, 0xCCCCCC);
+  Scene.addObject(GridHelper);
+  // add GridMesh
+  GridMesh = createGridMesh();
+  Scene.addObject(GridMesh);
+  // render
+  Scene.render();
+}
+
 // Mounted
 onMounted(() => {
+  const box = document.getElementById('renderbox');
+  Scene = SceneRef.value;
+  Scene.resetSize({
+    width: box.offsetWidth,
+    height: box.offsetHeight,
+  })
+  Scene.start();
+
+  // query basic data
   queryDetail(props.UID)
   .then(data => {
     var define = data['define'];
@@ -180,11 +188,17 @@ onMounted(() => {
       props.targetAt('define');
       return;
     }
+
+    Define = define;
+    Define.division = gridinfo.division;
+    Define.array = gridinfo.array;
     
-    // set grid
-    Grid.define(define.size, define.position, define.rotation);
-    GridArray.data = Grid.setGrid(gridinfo.array)
-    resetGridSize(gridinfo.division);
+    // query scene
+    props.getScene(true)
+    .then((mesh) => {
+      Mesh = mesh.clone();
+      onStart();
+    })
 
   })
 })
