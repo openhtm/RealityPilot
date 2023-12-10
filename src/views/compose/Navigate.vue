@@ -115,7 +115,6 @@
     ref="SceneRef"
     :orbit="true"
     :far="100"
-    :ambient="1"
   />
 </div>
 
@@ -189,7 +188,7 @@ var trans_control = null;
 
 var Define = {
   position: {x: 0, y: 0, z: 0},
-  rotation: {_x: 0, _y: 0, _z: 0},
+  rotation: {_x: 0, _y: 0, _z: 0, isEuler: true, _order: "XYZ"},
   size: 10,
   division: 64,
   array: [[]]

@@ -108,19 +108,23 @@ function removeObject(object) {
   render()
 }
 
+function setCameraTwc(matrix44) {
+  camera.applyMatrix4(matrix44);
+  if(props.orbit) orbit.update();
+  render();
+}
+
 function setCameraPosition(x, y, z) {
   camera.position.x = x;
   camera.position.y = y;
   camera.position.z = z;
-  if(props.orbit) 
-    orbit.update();
+  if(props.orbit) orbit.update();
   render()
 }
 
 function setCameraLookAt(x, y, z) {
   camera.lookAt(x, y, z);
-  if(props.orbit) 
-    orbit.update();
+  if(props.orbit) orbit.update();
   render()
 }
 
@@ -128,8 +132,7 @@ function setCameraUp(x, y, z) {
   camera.up.x = x;
   camera.up.y = y;
   camera.up.z = z;
-  if(props.orbit) 
-    orbit.update();
+  if(props.orbit) orbit.update();
   render()
 }
 
@@ -180,6 +183,7 @@ defineExpose({
   render,
   addObject,
   removeObject,
+  setCameraTwc,
   setCameraPosition,
   setCameraLookAt,
   setCameraUp,

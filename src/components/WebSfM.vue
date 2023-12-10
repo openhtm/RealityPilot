@@ -10,7 +10,8 @@
   </v-btn>
 
   <!-- switch -->
-  <div style="position: absolute; z-index: 20; top:20px; width: 100%;"
+  <div v-if="props.Type === 'create'"
+    style="position: absolute; z-index: 20; top:20px; width: 100%;"
     class="d-flex justify-center align-center"
   > 
     <v-btn-toggle rounded="lg" elevation="0"
@@ -255,20 +256,22 @@ function getPosition() {
 
 var SuccessCnt = -1;
 function onStateUpdate(state) {
-  // tracking lost or bad init
-  if(State[0] == 2 && state[0] != 2) {
-    SuccessCnt = 0;
-    switchStream(0);
+  if(props.Type === 'create') {
+    // tracking lost or bad init
+    if(State[0] == 2 && state[0] != 2) {
+      SuccessCnt = 0;
+      switchStream(0);
+    }
+    // count success times
+    if(state[0] == 2 && SuccessCnt >= 0)
+      SuccessCnt++;
+    // switch to intent if stable
+    if(state[0] == 2 && SuccessCnt > 10){
+      switchStream(IntentFrameType);
+      SuccessCnt = -1;
+    }
   }
-  // count success times
-  if(state[0] == 2 && SuccessCnt >= 0)
-    SuccessCnt++;
-  // switch to intent if stable
-  if(state[0] == 2 && SuccessCnt > (props.Type === 'create' ? 10 : 30)){
-    switchStream(IntentFrameType);
-    SuccessCnt = -1;
-  }
-  
+
   // set alert flag on state update
   if(State[0] != state[0] && state[0] != 2)
     AlertFlag.value = true;
@@ -348,7 +351,7 @@ function negotiate() {
         sdp: offer.sdp,
         type: offer.type,
         create_mode: (props.Type === 'create'),
-        uid: props.UID
+        uid: (props.Type === 'review' ? props.UID : null)
       }),
 		});
   })
