@@ -184,9 +184,10 @@ onMounted(() => {
   
   Scene.addObject(Plane);
 
-  Scene.setCameraPosition(0,20,0);
-  Scene.setCameraLookAt(0,0,0);
-  Scene.render();
+  Scene.updateCamera((camera) => {
+    camera.position.set(0, 20, 0);
+    camera.lookAt(0, 0, 0);
+  })
 
   trans_control = Scene.createTransformControl();
 

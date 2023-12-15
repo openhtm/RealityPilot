@@ -59,8 +59,10 @@ onMounted(() => {
   Scene.start();
 
   Scene.addObject(new THREE.AxesHelper(1));
-  Scene.setCameraPosition(2,3,6);
-  Scene.setCameraLookAt(0,0,-1);
+  Scene.updateCamera((camera) => {
+    camera.position.set(2,3,6);
+    camera.lookAt(0,0,-1);
+  })
 
   props.getScene()
   .then((mesh) => {

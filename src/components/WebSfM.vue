@@ -318,7 +318,6 @@ function createPeerConnection() {
 	// connect audio / video
 	pc.addEventListener('track', (evt) => {
     remote_stream = evt.streams[0];
-		// document.getElementById('rtc').srcObject = evt.streams[0];
 	});
 	return pc;
 }

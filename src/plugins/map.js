@@ -14,14 +14,7 @@ class GridMap{
   division = null;
   graph = null;
 
-  constructor() {
-    // translation
-    this.twp = null;
-    this.tpw = null;
-    // rotation
-    this.rwp = null;
-    this.rpw = null;
-  }
+  constructor() {}
 
   // set plane
   define(size, position, rotation) {
@@ -29,13 +22,6 @@ class GridMap{
     this.size = size;
     this.position = position;
     this.rotation = rotation;
-
-    // calculate transform matrix
-    this.rpw = new THREE.Matrix4().makeRotationFromEuler(rotation);
-    this.tpw = new THREE.Vector3(position.x, position.y, position.z);
-    // calculate invert
-    this.rwp = this.rpw.invert();
-    this.twp = this.tpw * -1;
   
     return this;
   }
@@ -103,8 +89,8 @@ class GridMap{
 
   // search
   search(start, end) {
-    var start_node = this.graph.grid[start.x][start.y];
-    var end_node = this.graph.grid[end.x][end.y];
+    var start_node = this.graph.grid[start.x][start.z];
+    var end_node = this.graph.grid[end.x][end.z];
 
     var result = astar.search(this.graph, start_node, end_node);
     return result;

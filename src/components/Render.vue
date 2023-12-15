@@ -108,32 +108,10 @@ function removeObject(object) {
   render()
 }
 
-function setCameraTwc(matrix44) {
-  camera.applyMatrix4(matrix44);
+function updateCamera(hook=()=>{}) {
+  hook(camera);
   if(props.orbit) orbit.update();
   render();
-}
-
-function setCameraPosition(x, y, z) {
-  camera.position.x = x;
-  camera.position.y = y;
-  camera.position.z = z;
-  if(props.orbit) orbit.update();
-  render()
-}
-
-function setCameraLookAt(x, y, z) {
-  camera.lookAt(x, y, z);
-  if(props.orbit) orbit.update();
-  render()
-}
-
-function setCameraUp(x, y, z) {
-  camera.up.x = x;
-  camera.up.y = y;
-  camera.up.z = z;
-  if(props.orbit) orbit.update();
-  render()
 }
 
 function createDragControl(objects, onDrag=()=>{}, onDragEnd=()=>{}) {
@@ -174,6 +152,8 @@ onMounted(() => {
   if(props.orbit) {
     orbit.addEventListener( 'change', render ); // use if there is no animation loop
   }
+  camera.position.set(new THREE.Vector3(0,0,0));
+  camera.lookAt(new THREE.Vector3(0,0,-1));
 })
 
 defineExpose({
@@ -183,13 +163,10 @@ defineExpose({
   render,
   addObject,
   removeObject,
-  setCameraTwc,
-  setCameraPosition,
-  setCameraLookAt,
-  setCameraUp,
+  updateCamera,
   createDragControl,
   createTransformControl,
   getScene: () => scene,
-  getCamera: () =>  camera,
+  getCamera: () => camera,
 })
 </script>

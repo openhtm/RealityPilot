@@ -345,8 +345,10 @@ function onStart() {
   trans_control = Scene.createTransformControl();
   trans_control.showY = false;
   // camera direction
-  Scene.setCameraPosition(2,2,8);
-  Scene.setCameraLookAt(0,0,0);
+  Scene.updateCamera((camera) => {
+    camera.position.set(0, 10, 0);
+    camera.lookAt(0, 0, 0);
+  })
   // add AxesHelper
   Scene.addObject(new THREE.AxesHelper(1));
   // add Main Mesh
