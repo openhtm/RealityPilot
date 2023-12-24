@@ -1,5 +1,3 @@
-import * as THREE from 'three'
-import { PLYLoader } from 'three/addons/loaders/PLYLoader.js';
 import { Graph, astar } from './astar';
 
 class GridMap{

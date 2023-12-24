@@ -15,8 +15,9 @@ import { createVuetify } from 'vuetify'
 const main = {
   dark: false,
   colors: {
-    background: '#F3F2F7', // grey-lighten-4
-    primary: '#2979FF', // blue-accent-3
+    background: '#FFFFFF',
+    background2: '#EFEFF1',
+    primary: '#0C84FE', // blue-accent-3
     info: '#424242', // grey-darken-3
     warning: '#FF5722', // deep-orange
     success: '#00C853', // green-accent-4

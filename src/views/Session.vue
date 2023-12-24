@@ -5,7 +5,7 @@
   <v-dialog v-model="Dialog" persistent fullscreen>
     <v-card class="fill-height overflow-hidden" color="grey-darken-3">
       <!-- search path -->
-      <v-btn 
+      <v-btn v-if="Type === 'review'"
         style="position: absolute; z-index: 40; bottom:20px; right:20px; background: rgba(0,0,0,0.2); backdrop-filter: blur(10px);"
         rounded="lg" variant="flat" size="large"
         @click="searchRoute"
@@ -26,8 +26,6 @@
 
       <!-- SfM session-->
       <session-box ref="SessionRef" 
-        :Type="Type" 
-        :UID="UID" 
         :onCancel="onCancel" 
         :onComplete="onComplete" 
       />
@@ -62,7 +60,7 @@ import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import * as THREE from 'three'
 // components
-import SessionBox from '@/components/WebSfM.vue'
+import SessionBox from '@/components/Capture.vue'
 import RenderBox from '@/components/Render';
 // tools
 import GridMap from '@/plugins/map'
@@ -322,7 +320,6 @@ onMounted(() => {
   Waiting.value = false;
   Dialog.value = true;
   Session = SessionRef.value;
-  Session.getMedia();
   if(Type === 'review')
     onReviewInit();
 })

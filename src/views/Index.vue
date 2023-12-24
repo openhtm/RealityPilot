@@ -1,77 +1,69 @@
 <template>
 <v-app>
-  <!-- navigation -->
-  <v-navigation-drawer
-    color="background"
-    width="260"
-    theme="main"
-    permanent
-    class="px-4 pt-10 d-flex flex-column"
-  >
-    <p class="text-h5 font-weight-black ml-2">
-      Reality Pilot
-    </p>
+<v-main class="pa-6">
+  <div class="d-flex justify-end align-center">
+    <!-- capture -->
+    <v-btn rounded="lg" variant="text" icon="" density="comfortable"
+      @click="Router.push('/capture')"
+    >
+      <v-icon color="primary" size="large">mdi-plus</v-icon>
+    </v-btn>
 
-    <div class="mt-2"></div>
+    <!-- select -->
+    <v-btn rounded="lg" variant="text" class="ml-3" icon="" density="comfortable">
+      <v-icon color="primary" size="large">mdi-dots-horizontal-circle-outline</v-icon>
+    </v-btn>
 
-    <!-- targets button -->
-    <nav-button
-      ref="TargetRef"
-      :targets="Targets"
-      :action="targetAt"
-    />
+    <!-- search -->
+    <template v-if="!mobile">
+      <div style="width: 20%;" class="ml-3">
+        <search-bar rounded="lg" />
+      </div>
+    </template>
+  </div>
 
-    <div class="mt-4"></div>
+  <!-- title -->
+  <p class="text-h4 font-weight-black">Reality Pilot</p>
 
-    <!-- info -->
-    <p class="text-h6 font-weight-bold ml-2">
-      Links
-    </p>
+  <!-- search bar for mobile -->
+  <template v-if="mobile">
+    <search-bar rounded="lg" class="mt-4"/>
+  </template>
 
-  </v-navigation-drawer>
-  <v-main class="pt-10">
-    <router-view></router-view>
-  </v-main>
+  <!-- scenes -->
+  <v-spacer class="mt-4"></v-spacer>
+  <v-row justify="space-around">
+    <v-col cols="auto" v-for="i in 9">
+      <brief-card
+      
+      />
+    </v-col>
+  </v-row>
+</v-main>
 </v-app>
 </template>
 
 <script setup>
-import {ref, reactive, onMounted } from 'vue';
+import {ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import NavButton from '@/layout/NavButton.vue';
+
+import SearchBar from '@/layout/SearchBar.vue';
+import BriefCard from '@/layout/BriefCard.vue';
 
 const Router = useRouter();
-const TargetRef = ref(null);
 
-const Targets = {
-  overview: {
-    tag: 'Overview',
-    path: '',
-    icon: 'mdi-star-outline'
-  },
-  start: {
-    tag: 'Start',
-    path: 'start',
-    icon: 'mdi-cube-scan'
-  },
-  about: {
-    tag: 'About',
-    path: 'about',
-    icon: 'mdi-information-outline',
-  }
-}
+const windowWidth = ref(window.innerWidth);
+const windowHeight = ref(window.innerHeight);
 
-function targetAt(key){
-  Router.push('/' + Targets[key].path);
-}
+const mobile = computed(() => {
+  return windowWidth.value < windowHeight.value;
+})
 
 onMounted(() => {
-  // get router path
-  const path = Router.currentRoute.value.path;
-  if(path === '/') TargetRef.value.Selected = 'overview';
-  else if(path === '/start') TargetRef.value.Selected = 'start';
-  else if(path === '/about') TargetRef.value.Selected = 'about';
-  else targetAt('overview')
+  window.addEventListener('resize', () => {
+    windowWidth.value = window.innerWidth;
+    windowHeight.value = window.innerHeight;
+  })
 })
 
 </script>

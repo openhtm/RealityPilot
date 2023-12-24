@@ -13,6 +13,9 @@ const props = defineProps({
   fov: {
     type: Number, default: 45
   },
+  aspect: {
+    type: Number, default: 4 / 3
+  },
   alpha:{
     type: Boolean, default: true
   },
@@ -44,7 +47,7 @@ const scene = new THREE.Scene();
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: props.alpha });
 renderer.setPixelRatio( window.devicePixelRatio );
 
-const camera = new THREE.PerspectiveCamera( props.fov, 4 / 3, props.near, props.far );
+const camera = new THREE.PerspectiveCamera( props.fov, props.aspect, props.near, props.far );
 scene.add(camera)
 
 const orbit = new OrbitControls( camera, renderer.domElement);
@@ -114,6 +117,21 @@ function updateCamera(hook=()=>{}) {
   render();
 }
 
+function formatTwcArray(raw) {
+  var array = []
+  for(let i = 0; i < 4; i++)
+    for(let j = 0; j < 4; j++)
+      array.push(raw[i + j * 4]) // col-order !!!!!!!!!!!
+  
+  const R = new THREE.Matrix4();
+  R.fromArray(array);
+  const T = new THREE.Vector3(array[12], array[13], array[14]);
+  
+  return {
+    R: R, T: T
+  }
+}
+
 function createDragControl(objects, onDrag=()=>{}, onDragEnd=()=>{}) {
   const control = new DragControls( objects, camera, renderer.domElement);
   control.addEventListener('drag', ()=>{
@@ -164,6 +182,7 @@ defineExpose({
   addObject,
   removeObject,
   updateCamera,
+  formatTwcArray,
   createDragControl,
   createTransformControl,
   getScene: () => scene,

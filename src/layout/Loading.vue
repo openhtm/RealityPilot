@@ -7,7 +7,7 @@
   <div style="width: 200px; height: 60px;"
     class="d-flex flex-column align-center justify-center"
   >
-    <p class="text-h6 mb-2 text-white">{{ props.Text }}</p>
+    <p class="text-h6 mb-2 text-white">{{ props.text }}</p>
     <v-progress-linear   
       rounded
       height="6"
@@ -22,7 +22,7 @@
 import { ref } from 'vue';
 
 const props = defineProps({
-  Text: {
+  text: {
     type: String,
     default: 'Loading'
   }

@@ -5,25 +5,13 @@ const routes = [
   {
     path: '/',
     component: () => import('@/views/Index.vue'),
-    children: [
-      {
-        path: '',
-        component: () => import('@/views/index/Overview.vue'),
-      },
-      {
-        path: 'start',
-        component: () => import('@/views/index/Start.vue'),
-      },
-      {
-        path: 'about',
-        component: () => import('@/views/index/About.vue')
-      },
-      
-    ],
-
   },
   {
-    path: '/session/:type/:uid',
+    path: '/capture',
+    component: () => import('@/views/session/Capture.vue')
+  },
+  {
+    path: '/review/:uid',
     component: () => import('@/views/Session.vue')
   },
   {

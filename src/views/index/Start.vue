@@ -64,7 +64,7 @@ const Reviews = reactive({
 });
 
 function openSession() {
-  Router.push('/session/create/0')
+  Router.push('/session/capture/0')
 }
 
 function openReview(id) {
